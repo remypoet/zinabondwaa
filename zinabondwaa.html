@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="sw" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ZinabondwaTips - Server-Sided Football Predictions</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        navy: {
+                            950: '#080D1A',
+                            900: '#0F172A',
+                            800: '#1E293B',
+                            700: '#334155',
+                        },
+                        emerald: { 500: '#10B981', 600: '#059669' },
+                        gold: { 400: '#FBBF24', 500: '#F59E0B', 600: '#D97706' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #0F172A; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.2); }
+        }
+        .live-dot { animation: pulse-dot 1.5s infinite ease-in-out; }
+        .glass-nav {
+            background: rgba(15, 23, 42, 0.94);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-navy-950 text-slate-100 font-sans antialiased selection:bg-emerald-500 selection:text-white flex justify-center min-h-screen">
+
+    <!-- Mobile App Shell -->
+    <div class="w-full max-w-md bg-navy-900 min-h-screen flex flex-col relative shadow-2xl border-x border-slate-800/80 overflow-x-hidden">
+
+        <!-- Top Header -->
+        <header class="sticky top-0 z-30 glass-nav border-b border-slate-800 px-4 py-3.5 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <i class="fa-solid fa-futbol text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg tracking-tight leading-none flex items-center gap-1.5">
+                        ZinabondwaTips <span class="text-[10px] bg-gold-500/20 text-gold-400 border border-gold-500/30 px-1.5 py-0.5 rounded font-extrabold">PRO</span>
+                    </h1>
+                    <p class="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1">
+                        <span id="server-status-dot" class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                        <span id="server-status-text">Inaunganisha Server...</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="switchTab('vip')" id="header-vip-badge" class="hidden bg-gold-500/20 border border-gold-500/40 text-gold-400 text-[11px] font-extrabold px-2.5 py-1.5 rounded-full items-center gap-1">
+                    <i class="fa-solid fa-crown text-[10px]"></i> VIP
+                </button>
+
+                <button onclick="toggleNotifications()" class="relative w-9 h-9 rounded-full bg-navy-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 transition active:scale-95 border border-slate-700/50">
+                    <i class="fa-regular fa-bell text-sm"></i>
+                    <span id="notif-dot" class="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full ring-2 ring-navy-800"></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Toast Container -->
+        <div id="toast-container" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-sm pointer-events-none flex flex-col gap-2"></div>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 pb-24 overflow-y-auto">
+
+            <!-- ==================== TAB 1: HOME (FREE TIPS) ==================== -->
+            <section id="tab-home" class="p-4 space-y-4">
+                
+                <!-- VIP Promo Banner -->
+                <div onclick="switchTab('vip')" class="cursor-pointer relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-600/30 via-navy-800 to-navy-800 border border-gold-500/30 p-4 shadow-lg group">
+                    <div class="flex items-center justify-between relative z-10">
+                        <div class="space-y-1 max-w-[75%]">
+                            <div class="inline-flex items-center gap-1.5 text-gold-400 text-xs font-bold uppercase tracking-wider">
+                                <i class="fa-solid fa-shield-halved"></i> Server-Protected VIP
+                            </div>
+                            <h2 class="text-base font-bold text-white leading-snug">Pata Odds 5.50+ zenye Uhakika wa Juu Leo!</h2>
+                            <p class="text-xs text-slate-300">Mechi za VIP zinalindwa na Server mpaka malipo yathibitishwe.</p>
+                        </div>
+                        <div class="w-11 h-11 rounded-full bg-gold-500 text-navy-950 flex items-center justify-center font-bold shadow-lg shadow-gold-500/30 group-hover:scale-105 transition">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date Filter Tabs -->
+                <div class="bg-navy-800 p-1 rounded-xl grid grid-cols-3 gap-1 border border-slate-700/60">
+                    <button onclick="filterDate('jana')" id="btn-date-jana" class="date-btn py-2 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition">
+                        Jana
+                    </button>
+                    <button onclick="filterDate('leo')" id="btn-date-leo" class="date-btn py-2 text-xs font-bold rounded-lg bg-emerald-500 text-navy-950 shadow-sm transition">
+                        Leo
+                    </button>
+                    <button onclick="filterDate('kesho')" id="btn-date-kesho" class="date-btn py-2 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition">
+                        Kesho
+                    </button>
+                </div>
+
+                <!-- Section Header -->
+                <div class="flex items-center justify-between pt-1">
+                    <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <span id="home-section-title">Utabiri wa Bure - Leo</span>
+                    </h3>
+                    <span class="text-[11px] text-slate-400">Bonyeza mechi kwa takwimu</span>
+                </div>
+
+                <!-- Free Matches List -->
+                <div id="free-matches-list" class="space-y-3">
+                    <div class="text-center py-10 text-slate-400 text-xs">
+                        <i class="fa-solid fa-spinner fa-spin text-emerald-500 text-lg mb-2 block"></i>
+                        Inapakia mechi kutoka kwenye Server...
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== TAB 2: VIP ZONE ==================== -->
+            <section id="tab-vip" class="hidden p-4 space-y-5">
+                
+                <!-- VIP Hero Card -->
+                <div class="rounded-2xl bg-gradient-to-b from-amber-500/20 to-navy-800 border border-gold-500/40 p-5 text-center relative overflow-hidden">
+                    <div class="w-12 h-12 rounded-2xl bg-gold-500/20 border border-gold-500/40 text-gold-400 flex items-center justify-center mx-auto mb-3 text-xl">
+                        <i class="fa-solid fa-crown"></i>
+                    </div>
+                    <h2 class="text-xl font-extrabold text-white">ZinabondwaTips VIP Club</h2>
+                    <p class="text-xs text-slate-300 mt-1 max-w-xs mx-auto">Data za VIP zinahifadhiwa kwenye Server maalum na hufunguliwa baada ya uhakiki wa akaunti yako.</p>
+                    
+                    <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-slate-700/60">
+                        <div>
+                            <p class="text-[11px] text-slate-400">Jumla ya Odds</p>
+                            <p id="vip-total-odds" class="text-base font-extrabold text-gold-400">6.12</p>
+                        </div>
+                        <div class="border-x border-slate-700/60">
+                            <p class="text-[11px] text-slate-400">Rekodi ya Jana</p>
+                            <p class="text-base font-extrabold text-emerald-400">✅ WON</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] text-slate-400">Ushindi Wiki</p>
+                            <p class="text-base font-extrabold text-white">6 / 7</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIP Subscription Countdown (Visible when unlocked) -->
+                <div id="vip-active-banner" class="hidden bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-3.5 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+                        <div>
+                            <p class="text-xs font-bold text-white">Uanachama wa VIP Uko Hai</p>
+                            <p id="vip-expiry-display" class="text-[11px] text-emerald-400 font-medium">Inaisha: --</p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] font-extrabold bg-emerald-500 text-navy-950 px-2 py-1 rounded">VERIFIED</span>
+                </div>
+
+                <!-- VIP Matches Container -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-bold text-gold-400 flex items-center gap-2">
+                            <i class="fa-solid fa-lock" id="vip-section-icon"></i> Mechi za VIP za Leo
+                        </h3>
+                        <span class="text-[10px] text-slate-400 bg-navy-800 px-2 py-0.5 rounded border border-slate-700">Server-Verified</span>
+                    </div>
+
+                    <div id="vip-matches-list" class="space-y-3">
+                        <!-- Rendered dynamically based on server isVip status -->
+                    </div>
+                </div>
+
+                <!-- Pricing Packages (Shown when Locked) -->
+                <div id="vip-packages-section" class="space-y-3 pt-1">
+                    <h3 class="text-sm font-bold text-white">Chagua Kifurushi Kufungua VIP:</h3>
+                    
+                    <div class="grid grid-cols-1 gap-2.5">
+                        <!-- Daily -->
+                        <div onclick="openPaymentModal('Kifurushi cha Siku (24h)', '2,000', 1)" class="cursor-pointer bg-navy-800 hover:bg-slate-800 border border-slate-700 hover:border-gold-500/60 rounded-xl p-3.5 flex items-center justify-between transition active:scale-[0.99]">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-gold-500/10 text-gold-400 flex items-center justify-center font-bold">24H</div>
+                                <div>
+                                    <h4 class="font-bold text-sm text-white">Kifurushi cha Siku</h4>
+                                    <p class="text-xs text-slate-400">Ufikiaji wa VIP kwa saa 24</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="block font-extrabold text-gold-400 text-sm">Tsh 2,000</span>
+                                <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-semibold">Lipia Sasa</span>
+                            </div>
+                        </div>
+
+                        <!-- Weekly -->
+                        <div onclick="openPaymentModal('Kifurushi cha Wiki (Siku 7)', '10,000', 7)" class="cursor-pointer relative bg-gradient-to-r from-navy-800 to-amber-950/30 border-2 border-gold-500 rounded-xl p-3.5 flex items-center justify-between transition active:scale-[0.99] shadow-lg shadow-gold-500/10">
+                            <span class="absolute -top-2.5 right-3 bg-gold-500 text-navy-950 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase">Maarufu Zaidi</span>
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-gold-500 text-navy-950 flex items-center justify-center font-extrabold">7D</div>
+                                <div>
+                                    <h4 class="font-bold text-sm text-white">Kifurushi cha Wiki</h4>
+                                    <p class="text-xs text-slate-300">Ufikiaji wa VIP kwa siku 7</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="block font-extrabold text-gold-400 text-sm">Tsh 10,000</span>
+                                <span class="text-[10px] bg-gold-500 text-navy-950 px-2 py-0.5 rounded font-bold">Okoa 28%</span>
+                            </div>
+                        </div>
+
+                        <!-- Monthly -->
+                        <div onclick="openPaymentModal('Kifurushi cha Mwezi (Siku 30)', '30,000', 30)" class="cursor-pointer bg-navy-800 hover:bg-slate-800 border border-slate-700 hover:border-gold-500/60 rounded-xl p-3.5 flex items-center justify-between transition active:scale-[0.99]">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-gold-500/10 text-gold-400 flex items-center justify-center font-bold">30D</div>
+                                <div>
+                                    <h4 class="font-bold text-sm text-white">Kifurushi cha Mwezi</h4>
+                                    <p class="text-xs text-slate-400">Ufikiaji wa VIP kwa siku 30</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="block font-extrabold text-gold-400 text-sm">Tsh 30,000</span>
+                                <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-semibold">Okoa 50%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 text-center">
+                        <p class="text-[11px] text-slate-400 mb-2">Malipo ya papo hapo kupitia mitandao ya simu:</p>
+                        <div class="flex items-center justify-center gap-2 flex-wrap">
+                            <span class="px-2.5 py-1 rounded bg-red-600/20 border border-red-500/30 text-red-400 text-[11px] font-bold">M-Pesa</span>
+                            <span class="px-2.5 py-1 rounded bg-blue-600/20 border border-blue-500/30 text-blue-400 text-[11px] font-bold">Tigo Pesa</span>
+                            <span class="px-2.5 py-1 rounded bg-rose-600/20 border border-rose-500/30 text-rose-400 text-[11px] font-bold">Airtel Money</span>
+                            <span class="px-2.5 py-1 rounded bg-orange-600/20 border border-orange-500/30 text-orange-400 text-[11px] font-bold">HaloPesa</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== TAB 3: LIVE & STATS ==================== -->
+            <section id="tab-live" class="hidden p-4 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-red-500 live-dot"></span>
+                        <h2 class="text-base font-bold text-white">Matokeo ya Moja kwa Moja</h2>
+                    </div>
+                    <span class="text-xs text-emerald-400 font-medium bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                        Live Feed
+                    </span>
+                </div>
+
+                <div id="live-matches-list" class="space-y-3.5"></div>
+            </section>
+
+            <!-- ==================== TAB 4: ADMIN & AKAUNTI ==================== -->
+            <section id="tab-admin" class="hidden p-4 space-y-5">
+                
+                <!-- Server User Profile Card -->
+                <div class="bg-navy-800 rounded-2xl p-4 border border-slate-700/70 space-y-3.5">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center text-lg font-bold text-emerald-400 border border-slate-600">
+                                <i class="fa-solid fa-user-shield"></i>
+                            </div>
+                            <div>
+                                <h3 id="profile-display-name" class="font-bold text-white text-sm">Mgeni (Akaunti ya Muda)</h3>
+                                <p id="profile-phone-display" class="text-xs text-slate-400">Hujasajili Namba / Email</p>
+                            </div>
+                        </div>
+                        <span id="account-badge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-700 text-slate-300">FREE</span>
+                    </div>
+
+                    <!-- Complete Server User ID for discoverability -->
+                    <div class="bg-navy-900 rounded-xl p-2.5 border border-slate-800 flex items-center justify-between">
+                        <div class="overflow-hidden pr-2">
+                            <span class="text-[10px] text-slate-500 block uppercase font-bold">Server User ID (UUID):</span>
+                            <code id="profile-uid-display" class="text-[11px] text-slate-300 font-mono break-all">Inapakia...</code>
+                        </div>
+                        <button onclick="copyUserId()" class="shrink-0 bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg text-xs">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+
+                    <!-- VIP Expiration Info -->
+                    <div class="bg-navy-900/70 rounded-xl p-3 border border-slate-800 flex items-center justify-between text-xs">
+                        <span class="text-slate-400">Hali ya Kifurushi (VIP):</span>
+                        <span id="profile-vip-countdown" class="font-bold text-slate-300">Hakuna Kifurushi Hai</span>
+                    </div>
+
+                    <!-- Auth / Account Linking Button -->
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <button onclick="openAuthModal()" class="flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-navy-950 py-2.5 rounded-xl text-xs font-extrabold transition">
+                            <i class="fa-solid fa-right-to-bracket"></i> Sajili / Ingia
+                        </button>
+                        <button onclick="shareApp()" class="flex items-center justify-center gap-2 bg-slate-700/60 hover:bg-slate-700 text-slate-200 border border-slate-600 py-2.5 rounded-xl text-xs font-bold transition">
+                            <i class="fa-solid fa-share-nodes"></i> Alika Rafiki
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PROTECTED ADMIN PANEL -->
+                <div class="bg-navy-800 rounded-2xl p-4 border border-emerald-500/30 space-y-4 shadow-lg">
+                    <div class="flex items-center justify-between border-b border-slate-700/70 pb-3">
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">Server Admin Control</span>
+                            <h3 class="font-bold text-base text-white mt-1">Usimamizi wa App (Admin)</h3>
+                        </div>
+                        <button onclick="toggleAdminLock()" id="btn-admin-lock" class="px-3 py-1.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-xs font-bold text-white flex items-center gap-1.5">
+                            <i class="fa-solid fa-lock-open text-emerald-400"></i> <span>Admin Active</span>
+                        </button>
+                    </div>
+
+                    <div id="admin-controls-wrapper" class="space-y-5">
+                        <!-- Form 1: Publish New Match to Firestore -->
+                        <form id="admin-post-form" onsubmit="handlePublishMatch(event)" class="space-y-3">
+                            <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider">1. Pakia Mechi Mpya (Server Database)</h4>
+                            
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-300 mb-1">Ligi</label>
+                                    <select id="post-league" class="w-full bg-navy-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+                                        <option value="EPL">England - EPL</option>
+                                        <option value="NBC Premier League">Tanzania - NBC Ligi</option>
+                                        <option value="UEFA Champions">UEFA Champions</option>
+                                        <option value="La Liga">Spain - La Liga</option>
+                                        <option value="Serie A">Italy - Serie A</option>
+                                        <option value="CAF Champions">CAF Champions</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-300 mb-1">Muda</label>
+                                    <input type="time" id="post-time" value="22:00" required class="w-full bg-navy-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-300 mb-1">Timu Nyumbani</label>
+                                    <input type="text" id="post-home" placeholder="Mfano: Simba SC" required class="w-full bg-navy-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-300 mb-1">Timu Ugenini</label>
+                                    <input type="text" id="post-away" placeholder="Mfano: Azam FC" required class="w-full bg-navy-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-300 mb-1">Utabiri (Tip)</label>
+                                    <input type="text" id="post-tip" placeholder="Mfano: Over 1.5" required class="w-full bg-navy-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-300 mb-1">Odds</label>
+                                    <input type="number" step="0.01" id="post-odds" placeholder="1.75" required class="w-full bg-navy-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-300 mb-1">Collection (Sehemu)</label>
+                                    <select id="post-category" class="w-full bg-navy-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+                                        <option value="free">Free Tips (free_tips)</option>
+                                        <option value="vip">VIP Zone (vip_tips)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-300 mb-1">Siku</label>
+                                    <select id="post-day" class="w-full bg-navy-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+                                        <option value="leo">Leo</option>
+                                        <option value="kesho">Kesho</option>
+                                        <option value="jana">Jana</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-300 mb-1">Uchambuzi Mfupi</label>
+                                <textarea id="post-reason" rows="2" placeholder="Sababu za kitaalamu za chaguo hili..." class="w-full bg-navy-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"></textarea>
+                            </div>
+
+                            <button type="submit" id="btn-publish-match" class="w-full bg-emerald-500 hover:bg-emerald-600 text-navy-950 font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 transition active:scale-[0.98] flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Hifadhi Kwenye Server
+                            </button>
+                        </form>
+
+                        <!-- Section 2: Update Existing Match Status (Won/Lost) -->
+                        <div class="pt-4 border-t border-slate-700/70 space-y-2.5">
+                            <h4 class="text-xs font-bold text-gold-400 uppercase tracking-wider">2. Sasisha Matokeo (Won / Lost)</h4>
+                            <div id="admin-manage-matches" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                                <!-- Rendered via JS -->
+                            </div>
+                        </div>
+
+                        <!-- Section 3: Manual VIP Override (For Admin Support) -->
+                        <div class="pt-4 border-t border-slate-700/70 space-y-2.5">
+                            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">3. Udhibiti wa VIP wa Akaunti Hii</h4>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="adminGrantVip(7)" class="bg-gold-500/20 hover:bg-gold-500/30 border border-gold-500/40 text-gold-400 py-2.5 rounded-xl text-xs font-bold transition">
+                                    + Fungua VIP (Siku 7)
+                                </button>
+                                <button onclick="adminRevokeVip()" class="bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-400 py-2.5 rounded-xl text-xs font-bold transition">
+                                    Funga VIP (Revoke)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- BOTTOM NAVIGATION BAR -->
+        <nav class="fixed bottom-0 w-full max-w-md glass-nav border-t border-slate-800 px-2 py-2 grid grid-cols-4 gap-1 z-30">
+            <button onclick="switchTab('home')" id="nav-home" class="nav-item flex flex-col items-center justify-center py-1.5 rounded-xl text-emerald-400 transition">
+                <i class="fa-solid fa-house text-lg mb-1"></i>
+                <span class="text-[10px] font-bold">Free Tips</span>
+            </button>
+            
+            <button onclick="switchTab('vip')" id="nav-vip" class="nav-item flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition relative">
+                <span class="absolute top-1 right-5 w-2 h-2 rounded-full bg-gold-500"></span>
+                <i class="fa-solid fa-crown text-lg mb-1"></i>
+                <span class="text-[10px] font-semibold">VIP Zone</span>
+            </button>
+            
+            <button onclick="switchTab('live')" id="nav-live" class="nav-item flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition relative">
+                <span class="absolute top-1 right-5 w-2 h-2 rounded-full bg-red-500 live-dot"></span>
+                <i class="fa-solid fa-chart-simple text-lg mb-1"></i>
+                <span class="text-[10px] font-semibold">Live & Stats</span>
+            </button>
+            
+            <button onclick="switchTab('admin')" id="nav-admin" class="nav-item flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition">
+                <i class="fa-solid fa-sliders text-lg mb-1"></i>
+                <span class="text-[10px] font-semibold">Admin / Akaunti</span>
+            </button>
+        </nav>
+
+        <!-- ==================== MODALS ==================== -->
+
+        <!-- 1. MATCH ANALYSIS MODAL -->
+        <div id="modal-analysis" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+            <div class="bg-navy-800 w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-slate-700 p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+                <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                    <span id="modal-league" class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full">EPL</span>
+                    <button onclick="closeModal('modal-analysis')" class="w-8 h-8 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div class="flex items-center justify-between text-center py-2">
+                    <div class="flex-1">
+                        <div class="w-12 h-12 rounded-2xl bg-navy-900 border border-slate-700 flex items-center justify-center mx-auto mb-2 font-extrabold text-sm text-white" id="modal-home-badge">ARS</div>
+                        <h4 id="modal-home-name" class="font-bold text-sm text-white">Arsenal</h4>
+                    </div>
+                    <div class="px-3">
+                        <span id="modal-time" class="text-xs font-bold text-slate-400 block mb-1">22:00</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-navy-900 text-xs font-extrabold text-slate-300 border border-slate-700">VS</span>
+                    </div>
+                    <div class="flex-1">
+                        <div class="w-12 h-12 rounded-2xl bg-navy-900 border border-slate-700 flex items-center justify-center mx-auto mb-2 font-extrabold text-sm text-white" id="modal-away-badge">CHE</div>
+                        <h4 id="modal-away-name" class="font-bold text-sm text-white">Chelsea</h4>
+                    </div>
+                </div>
+
+                <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-3.5 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] uppercase tracking-wider text-emerald-400 font-bold">Chaguo la Wataalamu</span>
+                        <p id="modal-tip" class="text-base font-extrabold text-white mt-0.5">Over 1.5 Goals</p>
+                    </div>
+                    <div class="bg-emerald-500 text-navy-950 font-extrabold px-3.5 py-2 rounded-xl text-sm">
+                        Odds <span id="modal-odds">1.65</span>
+                    </div>
+                </div>
+
+                <div class="bg-navy-900 rounded-2xl p-3.5 border border-slate-700/60 space-y-2.5">
+                    <h5 class="text-xs font-bold text-slate-300">Mwenendo wa Mechi 5 Zilizopita (Form)</h5>
+                    <div class="flex items-center justify-between text-xs">
+                        <span id="form-home-label" class="text-slate-400 font-medium">Home</span>
+                        <div id="form-home-badges" class="flex gap-1"></div>
+                    </div>
+                    <div class="flex items-center justify-between text-xs">
+                        <span id="form-away-label" class="text-slate-400 font-medium">Away</span>
+                        <div id="form-away-badges" class="flex gap-1"></div>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <h5 class="text-xs font-bold text-slate-300">Uchambuzi & Rekodi (H2H)</h5>
+                    <p id="modal-h2h" class="text-xs text-gold-400 font-semibold"></p>
+                    <p id="modal-reason" class="text-xs text-slate-300 leading-relaxed bg-navy-900/60 p-3 rounded-xl border border-slate-800"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. MOBILE MONEY PAYMENT MODAL -->
+        <div id="modal-payment" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+            <div class="bg-navy-800 w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-gold-500/40 p-5 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-gold-400"></i>
+                        <h3 class="font-bold text-sm text-white">Malipo Salama (Server Verified)</h3>
+                    </div>
+                    <button onclick="closeModal('modal-payment')" class="w-8 h-8 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div class="bg-navy-900 rounded-xl p-3 border border-slate-700 flex items-center justify-between">
+                    <div>
+                        <span class="text-[11px] text-slate-400">Kifurushi:</span>
+                        <h4 id="pay-pkg-name" class="font-bold text-sm text-white">Kifurushi cha Wiki</h4>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[11px] text-slate-400">Kiasi:</span>
+                        <p class="font-extrabold text-base text-gold-400">Tsh <span id="pay-pkg-amount">10,000</span></p>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-2">1. Chagua Mtandao:</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" onclick="selectNetwork(this, 'M-Pesa')" class="net-btn border-2 border-emerald-500 bg-emerald-500/10 text-white py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-between">
+                            <span>M-Pesa</span>
+                            <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                        </button>
+                        <button type="button" onclick="selectNetwork(this, 'Tigo Pesa')" class="net-btn border border-slate-700 bg-navy-900 text-slate-300 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-between">
+                            <span>Tigo Pesa</span>
+                            <i class="fa-regular fa-circle text-slate-500"></i>
+                        </button>
+                        <button type="button" onclick="selectNetwork(this, 'Airtel Money')" class="net-btn border border-slate-700 bg-navy-900 text-slate-300 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-between">
+                            <span>Airtel Money</span>
+                            <i class="fa-regular fa-circle text-slate-500"></i>
+                        </button>
+                        <button type="button" onclick="selectNetwork(this, 'HaloPesa')" class="net-btn border border-slate-700 bg-navy-900 text-slate-300 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-between">
+                            <span>HaloPesa</span>
+                            <i class="fa-regular fa-circle text-slate-500"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">2. Namba ya Simu ya Malipo:</label>
+                    <div class="relative">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">+255</span>
+                        <input type="tel" id="pay-phone-input" placeholder="0754 123 456" value="0754 889 900" class="w-full bg-navy-900 border border-slate-700 rounded-xl pl-14 pr-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-gold-500">
+                    </div>
+                </div>
+
+                <div id="payment-processing" class="hidden bg-amber-500/10 border border-gold-500/30 rounded-xl p-3 text-center space-y-1.5">
+                    <i class="fa-solid fa-spinner fa-spin text-gold-400 text-xl"></i>
+                    <p class="text-xs font-bold text-white">Inathibitisha muamala kwenye Server...</p>
+                    <p class="text-[11px] text-slate-300">Tafadhali subiri sekunde chache wakati akaunti yako inasasishwa.</p>
+                </div>
+
+                <button id="btn-confirm-pay" onclick="processServerPayment()" class="w-full bg-gradient-to-r from-gold-500 to-amber-500 hover:from-gold-400 hover:to-amber-400 text-navy-950 font-extrabold py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-gold-500/20 transition active:scale-[0.98]">
+                    Lipa Sasa & Fungua VIP
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. ACCOUNT REGISTRATION / PROFILE MODAL -->
+        <div id="modal-auth" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+            <div class="bg-navy-800 w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-slate-700 p-5 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                    <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                        <i class="fa-solid fa-user-check text-emerald-400"></i> Hifadhi Wasifu Wako (Server Profile)
+                    </h3>
+                    <button onclick="closeModal('modal-auth')" class="w-8 h-8 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <p class="text-xs text-slate-300">Sajili jina na namba yako ya simu ili kifurushi chako cha VIP kihifadhiwe salama kwenye Server.</p>
+
+                <form onsubmit="handleSaveUserProfile(event)" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Jina Kamili / Nickname</label>
+                        <input type="text" id="auth-name-input" placeholder="Mfano: Juma Mwinyi" required class="w-full bg-navy-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Namba ya Simu</label>
+                        <input type="tel" id="auth-phone-input" placeholder="0712 345 678" required class="w-full bg-navy-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-navy-950 font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition">
+                        Hifadhi Taarifa Kwenye Server
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 4. NOTIFICATIONS MODAL -->
+        <div id="modal-notifications" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-start justify-center pt-16 p-4">
+            <div class="bg-navy-800 w-full max-w-md rounded-2xl border border-slate-700 p-4 space-y-3 shadow-2xl">
+                <div class="flex items-center justify-between border-b border-slate-700 pb-2.5">
+                    <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                        <i class="fa-solid fa-bell text-emerald-400"></i> Arifa za Server
+                    </h3>
+                    <button onclick="toggleNotifications()" class="text-slate-400 hover:text-white text-sm">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div id="notifications-list" class="space-y-2.5 max-h-72 overflow-y-auto">
+                    <div class="bg-navy-900 p-3 rounded-xl border-l-4 border-emerald-500">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-emerald-400">🔒 Ulinzi wa Server Umewashwa</span>
+                            <span class="text-[10px] text-slate-500">Sasa hivi</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mt-1">Data za mechi na malipo yako vimeunganishwa moja kwa moja na Cloud Database.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ==================== FIREBASE & APP LOGIC ==================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Environment Config
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'zinabondwatips-default';
+        const firebaseConfig = JSON.parse(__firebase_config);
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Global State
+        let currentUser = null;
+        let userProfile = { isVip: false, vipExpiresAt: 0, displayName: 'Mgeni', phone: '' };
+        let freeMatches = [];
+        let vipMatches = [];
+        let currentDateFilter = 'leo';
+        let selectedNetwork = 'M-Pesa';
+        let selectedPackageDays = 7;
+        let selectedPackageName = '';
+        let selectedPackageAmount = '';
+        let isAdminUnlocked = true;
+
+        // Live Scores State
+        let liveMatches = [
+            { id: 1, league: 'EPL', minute: 64, home: 'Brighton', away: 'West Ham', scoreHome: 2, scoreAway: 1, possession: [61, 39], shotsTarget: [6, 3], corners: [7, 2] },
+            { id: 2, league: 'NBC Premier League', minute: 79, home: 'Dodoma Jiji', away: 'Namungo FC', scoreHome: 1, scoreAway: 1, possession: [48, 52], shotsTarget: [4, 5], corners: [5, 6] },
+            { id: 3, league: 'La Liga', minute: 45, isHT: true, home: 'Atletico Madrid', away: 'Sevilla', scoreHome: 1, scoreAway: 0, possession: [54, 46], shotsTarget: [4, 1], corners: [4, 2] }
+        ];
+
+        // --- 1. AUTHENTICATION FIRST (MANDATORY RULE 3) ---
+        async function initServerConnection() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Auth Error:", err);
+                updateServerStatus(false, "Hitilafu ya Mtandao");
+            }
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) return;
+            currentUser = user;
+            updateServerStatus(true, "Server Connected (Secure)");
+            document.getElementById('profile-uid-display').innerText = user.uid;
+
+            // Initialize User Server Profile
+            await ensureUserProfile(user.uid);
+
+            // Seed initial matches if database is empty
+            await seedInitialDatabase();
+
+            // Attach Real-time Listeners
+            listenToUserProfile(user.uid);
+            listenToFreeTips();
+        });
+
+        function updateServerStatus(connected, text) {
+            const dot = document.getElementById('server-status-dot');
+            const label = document.getElementById('server-status-text');
+            dot.className = connected ? 'w-1.5 h-1.5 rounded-full bg-emerald-500' : 'w-1.5 h-1.5 rounded-full bg-red-500';
+            label.innerText = text;
+        }
+
+        // --- 2. USER PROFILE & SERVER-SIDE VIP VERIFICATION ---
+        async function ensureUserProfile(uid) {
+            if (!currentUser) return;
+            const userRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
+            const snap = await getDoc(userRef);
+            if (!snap.exists()) {
+                await setDoc(userRef, {
+                    uid: uid,
+                    displayName: 'Mgeni / Mtumiaji',
+                    phone: '',
+                    isVip: false,
+                    vipExpiresAt: 0,
+                    createdAt: Date.now()
+                });
+            }
+        }
+
+        let vipUnsubscribe = null;
+
+        function listenToUserProfile(uid) {
+            if (!currentUser) return;
+            const userRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
+            
+            onSnapshot(userRef, (docSnap) => {
+                if (!docSnap.exists()) return;
+                const data = docSnap.data();
+                const now = Date.now();
+                
+                // Server-side expiration validation
+                const hasActiveVip = data.isVip === true && data.vipExpiresAt > now;
+                userProfile = { ...data, isVip: hasActiveVip };
+
+                updateAccountUI();
+
+                // SECURITY RULE: Only subscribe to 'vip_tips' collection when server confirms active VIP!
+                if (hasActiveVip) {
+                    if (!vipUnsubscribe) {
+                        listenToVipTips();
+                    }
+                } else {
+                    if (vipUnsubscribe) {
+                        vipUnsubscribe();
+                        vipUnsubscribe = null;
+                    }
+                    vipMatches = [];
+                    renderLockedVipScreen();
+                }
+            }, (error) => {
+                console.error("Profile Listener Error:", error);
+            });
+        }
+
+        function updateAccountUI() {
+            const badge = document.getElementById('account-badge');
+            const headerBadge = document.getElementById('header-vip-badge');
+            const activeBanner = document.getElementById('vip-active-banner');
+            const packagesSec = document.getElementById('vip-packages-section');
+            const vipIcon = document.getElementById('vip-section-icon');
+            const countdownEl = document.getElementById('profile-vip-countdown');
+            const expiryDisplay = document.getElementById('vip-expiry-display');
+
+            document.getElementById('profile-display-name').innerText = userProfile.displayName || 'Mgeni / Mtumiaji';
+            document.getElementById('profile-phone-display').innerText = userProfile.phone ? `+255 ${userProfile.phone}` : 'Bonyeza Sajili kuweka namba';
+
+            if (userProfile.isVip) {
+                const expDate = new Date(userProfile.vipExpiresAt);
+                const formattedDate = expDate.toLocaleDateString('sw-TZ', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                badge.innerText = 'VIP PRO';
+                badge.className = 'px-2.5 py-1 rounded-full text-xs font-extrabold bg-gold-500 text-navy-950';
+                
+                headerBadge.classList.remove('hidden');
+                headerBadge.classList.add('flex');
+                
+                activeBanner.classList.remove('hidden');
+                packagesSec.classList.add('hidden');
+                vipIcon.className = 'fa-solid fa-crown';
+                
+                countdownEl.innerText = `Hai mpaka ${formattedDate}`;
+                countdownEl.className = 'font-bold text-emerald-400';
+                expiryDisplay.innerText = `Inaisha: ${formattedDate}`;
+            } else {
+                badge.innerText = 'FREE';
+                badge.className = 'px-2.5 py-1 rounded-full text-xs font-bold bg-slate-700 text-slate-300';
+                
+                headerBadge.classList.add('hidden');
+                headerBadge.classList.remove('flex');
+                
+                activeBanner.classList.add('hidden');
+                packagesSec.classList.remove('hidden');
+                vipIcon.className = 'fa-solid fa-lock';
+                
+                countdownEl.innerText = 'Hakuna Kifurushi Hai';
+                countdownEl.className = 'font-bold text-slate-400';
+            }
+        }
+
+        // --- 3. FIRESTORE COLLECTIONS ('free_tips' & 'vip_tips') ---
+        function listenToFreeTips() {
+            if (!currentUser) return;
+            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'free_tips');
+            
+            onSnapshot(colRef, (snapshot) => {
+                freeMatches = [];
+                snapshot.forEach(doc => {
+                    freeMatches.push({ id: doc.id, collectionName: 'free_tips', ...doc.data() });
+                });
+                // Sort in memory by createdAt descending
+                freeMatches.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                renderFreeMatches();
+                renderAdminMatchManager();
+            }, (error) => {
+                console.error("Free Tips Error:", error);
+            });
+        }
+
+        function listenToVipTips() {
+            if (!currentUser || !userProfile.isVip) return;
+            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'vip_tips');
+            
+            vipUnsubscribe = onSnapshot(colRef, (snapshot) => {
+                vipMatches = [];
+                snapshot.forEach(doc => {
+                    vipMatches.push({ id: doc.id, collectionName: 'vip_tips', ...doc.data() });
+                });
+                vipMatches.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                renderUnlockedVipMatches();
+                renderAdminMatchManager();
+            }, (error) => {
+                console.error("VIP Tips Error:", error);
+            });
+        }
+
+        // --- 4. SEED INITIAL DATA IF EMPTY ---
+        async function seedInitialDatabase() {
+            if (!currentUser) return;
+            const metaRef = doc(db, 'artifacts', appId, 'public', 'data', 'app_meta', 'seeded_v1');
+            const metaSnap = await getDoc(metaRef);
+            if (metaSnap.exists()) return;
+
+            const freeCol = collection(db, 'artifacts', appId, 'public', 'data', 'free_tips');
+            const vipCol = collection(db, 'artifacts', appId, 'public', 'data', 'vip_tips');
+
+            const initialFree = [
+                {
+                    day: 'jana', league: 'UEFA Champions', time: '23:00', home: 'Real Madrid', away: 'Bayern Munich',
+                    tip: 'GG (Both Teams Score)', odds: '1.58', status: 'won', result: '2 - 1',
+                    homeForm: ['W', 'W', 'D', 'W', 'W'], awayForm: ['W', 'L', 'W', 'W', 'D'],
+                    h2h: 'Mechi 5 zilizopita zote zimetoa GG na Over 2.5.',
+                    reason: 'Timu zote zina safu kali za ushambuliaji na zimekuwa zikifunga katika kila mechi ya UEFA.',
+                    createdAt: Date.now() - 86400000
+                },
+                {
+                    day: 'jana', league: 'NBC Premier League', time: '16:00', home: 'Young Africans', away: 'Coastal Union',
+                    tip: 'Home Win (1)', odds: '1.35', status: 'won', result: '3 - 0',
+                    homeForm: ['W', 'W', 'W', 'W', 'D'], awayForm: ['L', 'D', 'W', 'L', 'L'],
+                    h2h: 'Yanga imeshinda mechi 4 mfululizo nyumbani dhidi ya Coastal Union.',
+                    reason: 'Ubora wa kikosi cha Yanga inapocheza uwanja wa nyumbani ni mkubwa sana.',
+                    createdAt: Date.now() - 86400500
+                },
+                {
+                    day: 'leo', league: 'EPL', time: '22:00', home: 'Arsenal', away: 'Chelsea',
+                    tip: 'Over 1.5 Goals', odds: '1.32', status: 'pending', result: '',
+                    homeForm: ['W', 'W', 'D', 'W', 'W'], awayForm: ['W', 'L', 'W', 'D', 'W'],
+                    h2h: 'Mechi 4 kati ya 5 zilizopita zimezalisha zaidi ya mabao 2.',
+                    reason: 'Derby ya London yenye ushindani mkubwa; timu zote zinashambulia kwa kasi.',
+                    createdAt: Date.now() - 1000
+                },
+                {
+                    day: 'leo', league: 'NBC Premier League', time: '19:00', home: 'Simba SC', away: 'Singida BS',
+                    tip: 'Home Win (1)', odds: '1.45', status: 'pending', result: '',
+                    homeForm: ['W', 'W', 'W', 'D', 'W'], awayForm: ['D', 'W', 'L', 'W', 'D'],
+                    h2h: 'Simba haijapoteza dhidi ya Singida BS katika mechi 4 zilizopita.',
+                    reason: 'Simba inahitaji pointi 3 muhimu kuendelea kukimbiza ubingwa.',
+                    createdAt: Date.now() - 2000
+                },
+                {
+                    day: 'kesho', league: 'La Liga', time: '23:00', home: 'Barcelona', away: 'Real Sociedad',
+                    tip: '1X & Over 1.5', odds: '1.48', status: 'pending', result: '',
+                    homeForm: ['W', 'W', 'W', 'L', 'W'], awayForm: ['D', 'L', 'W', 'D', 'W'],
+                    h2h: 'Barcelona imeshinda mechi 7 kati ya 8 za mwisho nyumbani.',
+                    reason: 'Safu ya ushambuliaji ya Barcelona iko katika kiwango bora sana.',
+                    createdAt: Date.now() - 3000
+                }
+            ];
+
+            const initialVip = [
+                {
+                    day: 'leo', league: 'EPL - VIP Special', time: '22:00', home: 'Newcastle Utd', away: 'Man United',
+                    tip: '1X & GG', odds: '2.05', status: 'pending', result: '',
+                    homeForm: ['W', 'W', 'D', 'W', 'L'], awayForm: ['L', 'W', 'D', 'L', 'W'],
+                    h2h: 'Newcastle wameshinda mechi 3 zilizopita St. James Park.',
+                    reason: 'Newcastle wana nguvu kubwa nyumbani na Man Utd wanaruhusu mashuti mengi langoni.',
+                    createdAt: Date.now() - 1000
+                },
+                {
+                    day: 'leo', league: 'Bundesliga - VIP', time: '21:30', home: 'Bayer Leverkusen', away: 'RB Leipzig',
+                    tip: 'Over 2.5 & GG', odds: '1.78', status: 'pending', result: '',
+                    homeForm: ['W', 'W', 'W', 'D', 'W'], awayForm: ['W', 'L', 'W', 'W', 'D'],
+                    h2h: 'Mechi 3 za mwisho zimetoa jumla ya mabao 13.',
+                    reason: 'Timu mbili zinazocheza soka la kasi na kushambulia muda wote.',
+                    createdAt: Date.now() - 2000
+                },
+                {
+                    day: 'leo', league: 'NBC Ligi - VIP Banker', time: '16:15', home: 'Azam FC', away: 'KMC FC',
+                    tip: 'Azam Win & Over 1.5', odds: '1.68', status: 'pending', result: '',
+                    homeForm: ['W', 'W', 'W', 'W', 'D'], awayForm: ['L', 'D', 'L', 'W', 'L'],
+                    h2h: 'Azam imeshinda mechi 4 kati ya 5 za mwisho dhidi ya KMC.',
+                    reason: 'Azam iko katika fomu nzuri na inahitaji ushindi kuimarisha nafasi yake.',
+                    createdAt: Date.now() - 3000
+                }
+            ];
+
+            for (const m of initialFree) await addDoc(freeCol, m);
+            for (const m of initialVip) await addDoc(vipCol, m);
+            await setDoc(metaRef, { seeded: true, timestamp: Date.now() });
+        }
+
+        // --- 5. RENDERING FUNCTIONS ---
+        function renderFreeMatches() {
+            const container = document.getElementById('free-matches-list');
+            const filtered = freeMatches.filter(m => m.day === currentDateFilter);
+
+            const leoCount = freeMatches.filter(m => m.day === 'leo').length;
+            document.getElementById('btn-date-leo').innerText = `Leo (${leoCount})`;
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs bg-navy-800 rounded-2xl border border-slate-800">Hakuna mechi zilizopakiwa kwa siku hii bado.</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(match => {
+                let statusBadge = `<span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-800 px-2 py-0.5 rounded-md">⏳ ${match.time}</span>`;
+                if (match.status === 'won') {
+                    statusBadge = `<span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-md">✅ WON ${match.result ? '('+match.result+')' : ''}</span>`;
+                } else if (match.status === 'lost') {
+                    statusBadge = `<span class="inline-flex items-center gap-1 text-[11px] font-bold text-red-400 bg-red-500/15 border border-red-500/30 px-2 py-0.5 rounded-md">❌ LOST ${match.result ? '('+match.result+')' : ''}</span>`;
+                }
+
+                return `
+                <div onclick="window.openMatchModal('${match.id}', 'free')" class="cursor-pointer bg-navy-800 hover:bg-slate-800/90 border border-slate-700/70 hover:border-emerald-500/40 rounded-2xl p-3.5 transition active:scale-[0.99] shadow-sm">
+                    <div class="flex items-center justify-between text-[11px] text-slate-400 mb-2.5 pb-2 border-b border-slate-700/50">
+                        <span class="font-semibold text-slate-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-trophy text-emerald-500 text-[10px]"></i> ${match.league}
+                        </span>
+                        ${statusBadge}
+                    </div>
+                    
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="space-y-1 flex-1">
+                            <p class="font-bold text-sm text-white">${match.home}</p>
+                            <p class="font-bold text-sm text-white">${match.away}</p>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <div class="text-right">
+                                <span class="block text-[10px] text-slate-400 uppercase">Utabiri</span>
+                                <span class="font-bold text-xs text-emerald-400">${match.tip}</span>
+                            </div>
+                            <div class="bg-navy-900 border border-slate-700 px-3 py-2 rounded-xl text-center min-w-[54px]">
+                                <span class="block text-[9px] text-slate-400">ODDS</span>
+                                <span class="font-extrabold text-xs text-white">${match.odds}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function renderLockedVipScreen() {
+            const container = document.getElementById('vip-matches-list');
+            document.getElementById('vip-total-odds').innerText = '6.12';
+            
+            // Secure placeholder cards (no actual match data fetched from server!)
+            const lockedSlots = [
+                { label: 'VIP Banker #1 • 16:15', odds: '1.68' },
+                { label: 'VIP Special #2 • 21:30', odds: '1.78' },
+                { label: 'VIP Mega Pick #3 • 22:00', odds: '2.05' }
+            ];
+
+            container.innerHTML = lockedSlots.map(slot => `
+                <div onclick="window.openPaymentModal('Kifurushi cha Wiki (Siku 7)', '10,000', 7)" class="cursor-pointer bg-navy-800/80 border border-gold-500/30 rounded-2xl p-3.5 relative overflow-hidden">
+                    <div class="flex items-center justify-between text-[11px] mb-2">
+                        <span class="text-gold-400 font-bold flex items-center gap-1.5">
+                            <i class="fa-solid fa-crown text-[10px]"></i> ${slot.label}
+                        </span>
+                        <span class="text-[10px] text-slate-400 bg-navy-900 px-2 py-0.5 rounded">Imefungwa na Server</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-9 h-9 rounded-xl bg-gold-500/15 border border-gold-500/30 text-gold-400 flex items-center justify-center">
+                                <i class="fa-solid fa-lock"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-400">Data za mechi zimefichwa (Encrypted)</p>
+                                <p class="text-[11px] text-gold-400 font-semibold mt-0.5">Lipia kifurushi kufungua mechi hii</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-gold-500/20 border border-gold-500/40 px-3 py-1.5 rounded-xl text-center">
+                            <span class="block text-[9px] text-gold-300">ODDS</span>
+                            <span class="font-extrabold text-xs text-gold-400">${slot.odds}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderUnlockedVipMatches() {
+            const container = document.getElementById('vip-matches-list');
+            
+            if (vipMatches.length === 0) {
+                container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs bg-navy-800 rounded-2xl">Inapakia mechi za VIP kutoka kwenye Server...</div>`;
+                return;
+            }
+
+            let totalOdds = 1;
+            vipMatches.forEach(m => totalOdds *= parseFloat(m.odds || 1));
+            document.getElementById('vip-total-odds').innerText = totalOdds.toFixed(2);
+
+            container.innerHTML = vipMatches.map(match => {
+                let statusBadge = `<span class="text-slate-300">⏰ ${match.time}</span>`;
+                if (match.status === 'won') statusBadge = `<span class="text-emerald-400 font-bold">✅ WON</span>`;
+                if (match.status === 'lost') statusBadge = `<span class="text-red-400 font-bold">❌ LOST</span>`;
+
+                return `
+                <div onclick="window.openMatchModal('${match.id}', 'vip')" class="cursor-pointer bg-gradient-to-r from-navy-800 to-amber-950/20 border border-gold-500/50 rounded-2xl p-3.5 shadow-md transition active:scale-[0.99]">
+                    <div class="flex items-center justify-between text-[11px] text-gold-400 mb-2 pb-2 border-b border-slate-700/60">
+                        <span class="font-bold flex items-center gap-1.5">
+                            <i class="fa-solid fa-crown"></i> ${match.league}
+                        </span>
+                        ${statusBadge}
+                    </div>
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="space-y-1 flex-1">
+                            <p class="font-bold text-sm text-white">${match.home}</p>
+                            <p class="font-bold text-sm text-white">${match.away}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="text-right">
+                                <span class="block text-[10px] text-gold-300 uppercase">VIP Pick</span>
+                                <span class="font-extrabold text-xs text-gold-400">${match.tip}</span>
+                            </div>
+                            <div class="bg-gold-500 text-navy-950 px-3 py-2 rounded-xl text-center min-w-[54px]">
+                                <span class="block text-[9px] font-bold">ODDS</span>
+                                <span class="font-extrabold text-xs">${match.odds}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function renderAdminMatchManager() {
+            const container = document.getElementById('admin-manage-matches');
+            const allMatches = [...freeMatches, ...vipMatches];
+            
+            if (allMatches.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400">Hakuna mechi kwenye database.</p>`;
+                return;
+            }
+
+            container.innerHTML = allMatches.map(m => `
+                <div class="bg-navy-900 p-2.5 rounded-xl border border-slate-800 flex items-center justify-between gap-2">
+                    <div class="overflow-hidden">
+                        <span class="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded ${m.collectionName === 'vip_tips' ? 'bg-gold-500/20 text-gold-400' : 'bg-emerald-500/20 text-emerald-400'}">
+                            ${m.collectionName === 'vip_tips' ? 'VIP' : 'FREE'}
+                        </span>
+                        <p class="text-xs font-bold text-white truncate mt-1">${m.home} vs ${m.away}</p>
+                        <p class="text-[10px] text-slate-400">${m.tip} (@${m.odds}) • Hali: <strong class="uppercase">${m.status}</strong></p>
+                    </div>
+                    <div class="flex items-center gap-1 shrink-0">
+                        <button onclick="window.updateMatchStatus('${m.collectionName}', '${m.id}', 'won')" title="Mark Won" class="w-7 h-7 rounded-lg bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-navy-950 text-xs font-bold transition">✅</button>
+                        <button onclick="window.updateMatchStatus('${m.collectionName}', '${m.id}', 'lost')" title="Mark Lost" class="w-7 h-7 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white text-xs font-bold transition">❌</button>
+                        <button onclick="window.deleteMatchFromServer('${m.collectionName}', '${m.id}')" title="Futa" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white text-xs transition"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderLiveMatches() {
+            const container = document.getElementById('live-matches-list');
+            container.innerHTML = liveMatches.map(m => `
+                <div class="bg-navy-800 border border-slate-700/70 rounded-2xl p-4 space-y-3">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-semibold text-slate-400">${m.league}</span>
+                        <span class="inline-flex items-center gap-1.5 font-extrabold text-red-400 bg-red-500/10 px-2.5 py-0.5 rounded-full">
+                            <span class="w-1.5 h-1.5 rounded-full bg-red-500 live-dot"></span>
+                            ${m.isHT ? 'HT' : m.minute + "'"}
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between py-1">
+                        <div class="flex-1 text-left font-bold text-sm text-white">${m.home}</div>
+                        <div class="px-4 py-1.5 rounded-xl bg-navy-900 border border-slate-700 font-extrabold text-base text-emerald-400 tracking-wider">
+                            ${m.scoreHome} - ${m.scoreAway}
+                        </div>
+                        <div class="flex-1 text-right font-bold text-sm text-white">${m.away}</div>
+                    </div>
+                    <div class="pt-2 border-t border-slate-700/50 space-y-2 text-[11px]">
+                        <div>
+                            <div class="flex justify-between text-slate-400 mb-1">
+                                <span class="font-bold text-white">${m.possession[0]}%</span>
+                                <span>Umiliki wa Mpira</span>
+                                <span class="font-bold text-white">${m.possession[1]}%</span>
+                            </div>
+                            <div class="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden flex">
+                                <div style="width: ${m.possession[0]}%" class="bg-emerald-500 h-full"></div>
+                                <div style="width: ${m.possession[1]}%" class="bg-slate-500 h-full"></div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between text-slate-400 pt-1">
+                            <span>Mashuti Lengwa: <strong class="text-white">${m.shotsTarget[0]}</strong></span>
+                            <span>Kona: <strong class="text-white">${m.corners[0]} - ${m.corners[1]}</strong></span>
+                            <span>Mashuti Lengwa: <strong class="text-white">${m.shotsTarget[1]}</strong></span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- 6. SERVER ACTIONS (PAYMENTS, ADMIN CRUD, PROFILE) ---
+        window.processServerPayment = async function() {
+            if (!currentUser) return;
+            const phone = document.getElementById('pay-phone-input').value.trim();
+            if (phone.length < 9) {
+                showToast('Tafadhali weka namba sahihi ya simu!', 'error');
+                return;
+            }
+
+            const loader = document.getElementById('payment-processing');
+            const btn = document.getElementById('btn-confirm-pay');
+            loader.classList.remove('hidden');
+            btn.disabled = true;
+            btn.innerText = 'Inasasisha Server...';
+
+            try {
+                // Calculate server expiration timestamp
+                const durationMs = selectedPackageDays * 24 * 60 * 60 * 1000;
+                const expiresAt = Date.now() + durationMs;
+
+                // Update User Profile in Firestore
+                const userRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data');
+                await updateDoc(userRef, {
+                    isVip: true,
+                    vipExpiresAt: expiresAt,
+                    phone: phone,
+                    lastPaymentNetwork: selectedNetwork,
+                    lastPackage: selectedPackageName
+                });
+
+                // Log transaction in private user subcollection
+                const txCol = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions');
+                await addDoc(txCol, {
+                    package: selectedPackageName,
+                    amount: selectedPackageAmount,
+                    network: selectedNetwork,
+                    phone: phone,
+                    status: 'COMPLETED',
+                    timestamp: Date.now()
+                });
+
+                closeModal('modal-payment');
+                showToast('🎉 Malipo yamethibitishwa na Server! VIP Imefunguka.', 'success');
+            } catch (err) {
+                console.error("Payment Error:", err);
+                showToast('Hitilafu imetokea wakati wa kusasisha malipo.', 'error');
+            } finally {
+                loader.classList.add('hidden');
+                btn.disabled = false;
+                btn.innerText = 'Lipa Sasa & Fungua VIP';
+            }
+        };
+
+        window.handlePublishMatch = async function(e) {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const btn = document.getElementById('btn-publish-match');
+            btn.disabled = true;
+
+            try {
+                const category = document.getElementById('post-category').value;
+                const colName = category === 'vip' ? 'vip_tips' : 'free_tips';
+                const colRef = collection(db, 'artifacts', appId, 'public', 'data', colName);
+
+                const newMatch = {
+                    league: document.getElementById('post-league').value,
+                    time: document.getElementById('post-time').value,
+                    home: document.getElementById('post-home').value.trim(),
+                    away: document.getElementById('post-away').value.trim(),
+                    tip: document.getElementById('post-tip').value.trim(),
+                    odds: parseFloat(document.getElementById('post-odds').value).toFixed(2),
+                    day: document.getElementById('post-day').value,
+                    status: 'pending',
+                    result: '',
+                    homeForm: ['W', 'W', 'D', 'W', 'W'],
+                    awayForm: ['W', 'L', 'W', 'D', 'L'],
+                    h2h: 'Takwimu za hivi karibuni zinaunga mkono chaguo hili.',
+                    reason: document.getElementById('post-reason').value.trim() || 'Uchambuzi wa kitaalamu wa takwimu za mechi.',
+                    createdAt: Date.now()
+                };
+
+                await addDoc(colRef, newMatch);
+                document.getElementById('admin-post-form').reset();
+                showToast(`✅ Mechi imehifadhiwa kwenye Server (${colName})!`, 'success');
+            } catch (err) {
+                console.error("Publish Error:", err);
+                showToast('Imeshindwa kuhifadhi mechi kwenye Server.', 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        };
+
+        window.updateMatchStatus = async function(colName, docId, status) {
+            if (!currentUser) return;
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', colName, docId);
+                await updateDoc(docRef, {
+                    status: status,
+                    result: status === 'won' ? 'FT' : 'FT'
+                });
+                showToast(`Matokeo yamesasishwa kuwa ${status.toUpperCase()}!`, 'success');
+            } catch (err) {
+                console.error("Update Status Error:", err);
+                showToast('Hitilafu kusasisha matokeo.', 'error');
+            }
+        };
+
+        window.deleteMatchFromServer = async function(colName, docId) {
+            if (!currentUser) return;
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', colName, docId);
+                await deleteDoc(docRef);
+                showToast('Mechi imefutwa kwenye Server.', 'info');
+            } catch (err) {
+                console.error("Delete Error:", err);
+            }
+        };
+
+        window.adminGrantVip = async function(days) {
+            if (!currentUser) return;
+            const userRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data');
+            await updateDoc(userRef, {
+                isVip: true,
+                vipExpiresAt: Date.now() + (days * 24 * 60 * 60 * 1000)
+            });
+            showToast(`VIP imewashwa kwa siku ${days}!`, 'success');
+        };
+
+        window.adminRevokeVip = async function() {
+            if (!currentUser) return;
+            const userRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data');
+            await updateDoc(userRef, {
+                isVip: false,
+                vipExpiresAt: 0
+            });
+            showToast('VIP imefungwa (Revoked) kwenye Server.', 'info');
+        };
+
+        window.handleSaveUserProfile = async function(e) {
+            e.preventDefault();
+            if (!currentUser) return;
+            const name = document.getElementById('auth-name-input').value.trim();
+            const phone = document.getElementById('auth-phone-input').value.trim();
+
+            const userRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data');
+            await updateDoc(userRef, {
+                displayName: name,
+                phone: phone
+            });
+
+            closeModal('modal-auth');
+            showToast('Taarifa zako zimehifadhiwa kwenye Server!', 'success');
+        };
+
+        // --- 7. UI NAVIGATION & HELPERS ---
+        window.switchTab = function(tabName) {
+            ['home', 'vip', 'live', 'admin'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                const navBtn = document.getElementById(`nav-${t}`);
+                navBtn.classList.remove('text-emerald-400', 'text-gold-400');
+                navBtn.classList.add('text-slate-400');
+            });
+
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${tabName}`);
+            activeBtn.classList.remove('text-slate-400');
+            activeBtn.classList.add(tabName === 'vip' ? 'text-gold-400' : 'text-emerald-400');
+        };
+
+        window.filterDate = function(day) {
+            currentDateFilter = day;
+            ['jana', 'leo', 'kesho'].forEach(d => {
+                const btn = document.getElementById(`btn-date-${d}`);
+                btn.className = d === day
+                    ? 'date-btn py-2 text-xs font-bold rounded-lg bg-emerald-500 text-navy-950 shadow-sm transition'
+                    : 'date-btn py-2 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition';
+            });
+
+            const titles = {
+                'jana': 'Matokeo ya Jana',
+                'leo': 'Utabiri wa Bure - Leo',
+                'kesho': 'Mechi za Kesho'
+            };
+            document.getElementById('home-section-title').innerText = titles[day];
+            renderFreeMatches();
+        };
+
+        window.openMatchModal = function(id, type) {
+            const list = type === 'vip' ? vipMatches : freeMatches;
+            const match = list.find(m => m.id === id);
+            if (!match) return;
+
+            document.getElementById('modal-league').innerText = match.league;
+            document.getElementById('modal-time').innerText = match.time;
+            document.getElementById('modal-home-name').innerText = match.home;
+            document.getElementById('modal-away-name').innerText = match.away;
+            document.getElementById('modal-home-badge').innerText = match.home.substring(0, 3).toUpperCase();
+            document.getElementById('modal-away-badge').innerText = match.away.substring(0, 3).toUpperCase();
+            document.getElementById('modal-tip').innerText = match.tip;
+            document.getElementById('modal-odds').innerText = match.odds;
+            document.getElementById('form-home-label').innerText = match.home;
+            document.getElementById('form-away-label').innerText = match.away;
+            document.getElementById('modal-h2h').innerText = `📊 H2H: ${match.h2h}`;
+            document.getElementById('modal-reason').innerText = match.reason;
+
+            const renderForm = (arr) => (arr || ['W', 'W', 'D', 'W', 'L']).map(res => {
+                const color = res === 'W' ? 'bg-emerald-500 text-navy-950' : res === 'D' ? 'bg-amber-500 text-navy-950' : 'bg-red-500 text-white';
+                return `<span class="w-5 h-5 rounded text-[10px] font-extrabold flex items-center justify-center ${color}">${res}</span>`;
+            }).join('');
+
+            document.getElementById('form-home-badges').innerHTML = renderForm(match.homeForm);
+            document.getElementById('form-away-badges').innerHTML = renderForm(match.awayForm);
+
+            document.getElementById('modal-analysis').classList.remove('hidden');
+        };
+
+        window.openPaymentModal = function(pkgName, amount, days) {
+            selectedPackageName = pkgName;
+            selectedPackageAmount = amount;
+            selectedPackageDays = days;
+            document.getElementById('pay-pkg-name').innerText = pkgName;
+            document.getElementById('pay-pkg-amount').innerText = amount;
+            document.getElementById('modal-payment').classList.remove('hidden');
+        };
+
+        window.selectNetwork = function(btn, networkName) {
+            selectedNetwork = networkName;
+            document.querySelectorAll('.net-btn').forEach(b => {
+                b.className = 'net-btn border border-slate-700 bg-navy-900 text-slate-300 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-between';
+                b.querySelector('i').className = 'fa-regular fa-circle text-slate-500';
+            });
+            btn.className = 'net-btn border-2 border-emerald-500 bg-emerald-500/10 text-white py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-between';
+            btn.querySelector('i').className = 'fa-solid fa-circle-check text-emerald-400';
+        };
+
+        window.openAuthModal = function() {
+            document.getElementById('auth-name-input').value = userProfile.displayName !== 'Mgeni / Mtumiaji' ? userProfile.displayName : '';
+            document.getElementById('auth-phone-input').value = userProfile.phone || '';
+            document.getElementById('modal-auth').classList.remove('hidden');
+        };
+
+        window.closeModal = function(id) {
+            document.getElementById(id).classList.add('hidden');
+        };
+
+        window.toggleNotifications = function() {
+            document.getElementById('modal-notifications').classList.toggle('hidden');
+            document.getElementById('notif-dot').classList.add('hidden');
+        };
+
+        window.toggleAdminLock = function() {
+            isAdminUnlocked = !isAdminUnlocked;
+            const wrapper = document.getElementById('admin-controls-wrapper');
+            const btn = document.getElementById('btn-admin-lock');
+            if (isAdminUnlocked) {
+                wrapper.classList.remove('hidden');
+                btn.innerHTML = `<i class="fa-solid fa-lock-open text-emerald-400"></i> <span>Admin Active</span>`;
+            } else {
+                wrapper.classList.add('hidden');
+                btn.innerHTML = `<i class="fa-solid fa-lock text-red-400"></i> <span>Admin Locked</span>`;
+            }
+        };
+
+        window.copyUserId = function() {
+            if (!currentUser) return;
+            const dummy = document.createElement('input');
+            document.body.appendChild(dummy);
+            dummy.value = currentUser.uid;
+            dummy.select();
+            document.execCommand('copy');
+            document.body.removeChild(dummy);
+            showToast('Server User ID imenakiliwa!', 'success');
+        };
+
+        window.shareApp = function() {
+            const dummy = document.createElement('input');
+            document.body.appendChild(dummy);
+            dummy.value = 'Jiunge na ZinabondwaTips kwa utabiri wa soka na takwimu za uhakika!';
+            dummy.select();
+            document.execCommand('copy');
+            document.body.removeChild(dummy);
+            showToast('Link ya kualika marafiki imenakiliwa!', 'success');
+        };
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const colors = type === 'success' ? 'bg-emerald-600 text-white border-emerald-400' : type === 'error' ? 'bg-red-600 text-white border-red-400' : 'bg-slate-800 text-white border-slate-600';
+            toast.className = `${colors} border px-4 py-3 rounded-xl shadow-2xl text-xs font-bold flex items-center gap-2 transition-all duration-300`;
+            toast.innerHTML = `<span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        // Start App
+        window.onload = function() {
+            initServerConnection();
+            renderLiveMatches();
+            setInterval(() => {
+                liveMatches.forEach(m => { if (!m.isHT && m.minute < 90) m.minute += 1; });
+                renderLiveMatches();
+            }, 12000);
+        };
+    </script>
+</body>
+</html>
